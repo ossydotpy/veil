@@ -12,5 +12,6 @@ type Store interface {
 	Delete(vault, name string) error
 	List(vault string) ([]string, error)
 	ListVaults() ([]string, error)
+	Nuke() error
 	Close() error
 }

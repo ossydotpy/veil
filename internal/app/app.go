@@ -44,3 +44,7 @@ func (a *App) List(vault string) ([]string, error) {
 func (a *App) ListVaults() ([]string, error) {
 	return a.store.ListVaults()
 }
+
+func (a *App) Reset() error {
+	return a.store.Nuke()
+}

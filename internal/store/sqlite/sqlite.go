@@ -120,6 +120,16 @@ func (s *SqliteStore) ListVaults() ([]string, error) {
 	return vaults, nil
 }
 
+func (s *SqliteStore) Nuke() error {
+	query := `DELETE FROM secrets;`
+	_, err := s.db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("failed to nuke database: %w", err)
+	}
+	_, _ = s.db.Exec("VACUUM;")
+	return nil
+}
+
 func (s *SqliteStore) Close() error {
 	return s.db.Close()
 }
