@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/ossydotpy/veil/internal/crypto"
+	"github.com/ossydotpy/veil/internal/exporter"
 	"github.com/ossydotpy/veil/internal/store"
 )
 
@@ -47,4 +48,46 @@ func (a *App) ListVaults() ([]string, error) {
 
 func (a *App) Reset() error {
 	return a.store.Nuke()
+}
+
+func (a *App) GetAllSecrets(vault string) (map[string]string, error) {
+	names, err := a.store.List(vault)
+	if err != nil {
+		return nil, err
+	}
+
+	secrets := make(map[string]string, len(names))
+	for _, name := range names {
+		value, err := a.Get(vault, name)
+		if err != nil {
+			return nil, err
+		}
+		secrets[name] = value
+	}
+
+	return secrets, nil
+}
+
+func (a *App) Export(vault string, opts exporter.ExportOptions) (*exporter.Preview, error) {
+	secrets, err := a.GetAllSecrets(vault)
+	if err != nil {
+		return nil, err
+	}
+
+	filtered := exporter.FilterSecrets(secrets, opts.Include, opts.Exclude)
+
+	exp := exporter.Get(opts.Format)
+
+	preview, err := exp.Preview(filtered, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	if !opts.DryRun {
+		if err := exp.Export(filtered, opts); err != nil {
+			return nil, err
+		}
+	}
+
+	return preview, nil
 }
