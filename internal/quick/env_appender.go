@@ -66,12 +66,18 @@ func AppendBatchToEnvFile(path string, results []*Result, force bool) error {
 		// If force, we need to update existing keys
 		if force {
 			lines := parseEnvFileWithLines(path)
+
+			// Build a map of env name to value for efficient lookups
+			updates := make(map[string]string, len(results))
+			for _, result := range results {
+				updates[result.EnvName] = result.Value
+			}
+
+			// Single pass over lines with O(1) lookups
 			for i, line := range lines {
-				for _, result := range results {
-					if line.key == result.EnvName {
-						lines[i].value = result.Value
-						lines[i].original = fmt.Sprintf("%s=%s", result.EnvName, escapeValue(result.Value))
-					}
+				if newVal, ok := updates[line.key]; ok {
+					lines[i].value = newVal
+					lines[i].original = fmt.Sprintf("%s=%s", line.key, escapeValue(newVal))
 				}
 			}
 			for _, line := range lines {
