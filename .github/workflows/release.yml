@@ -47,8 +47,9 @@ jobs:
         GOARCH: ${{ matrix.goarch }}
       run: |
         output="veil_${{ matrix.suffix }}"
-        go build -ldflags '-s -w' -o "$output" ./cmd/veil
-        echo "Built: $output"
+        version="${GITHUB_REF_NAME#v}"
+        go build -ldflags "-s -w -X main.version=$version" -o "$output" ./cmd/veil
+        echo "Built: $output (version: $version)"
         ls -la "$output"
 
     - name: Upload artifact
