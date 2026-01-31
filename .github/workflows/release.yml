@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: linux_amd64
+          - goos: linux
+            goarch: arm64
+            suffix: linux_arm64
+          - goos: darwin
+            goarch: amd64
+            suffix: darwin_amd64
+          - goos: darwin
+            goarch: arm64
+            suffix: darwin_arm64
+          - goos: windows
+            goarch: amd64
+            suffix: windows_amd64.exe
+          - goos: windows
+            goarch: arm64
+            suffix: windows_arm64.exe
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+      run: |
+        output="veil_${{ matrix.suffix }}"
+        go build -ldflags '-s -w' -o "$output" ./cmd/veil
+        echo "Built: $output"
+        ls -la "$output"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: veil_${{ matrix.suffix }}
+        path: veil_${{ matrix.suffix }}
+        retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+
+    - name: Display downloaded artifacts
+      run: |
+        ls -la artifacts/
+
+    - name: Upload to release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: artifacts/veil_*
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
