@@ -19,8 +19,8 @@ type Options struct {
 	Count     int  // generate multiple secrets
 
 	// Output options
-	ToFile   string // path to append
-	EnvName  string // KEY_NAME for env file
+	ToFile   string // path to append; requires EnvName to be non-empty
+	EnvName  string // KEY_NAME for env file; required when ToFile is specified
 	Force    bool   // overwrite existing in .env
 	Template string // custom format template
 }
