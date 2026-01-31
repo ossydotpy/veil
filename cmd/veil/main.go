@@ -473,8 +473,6 @@ func runQuickCommand(args []string) {
 
 	// Handle count > 1
 	if opts.Count > 1 {
-		// Set count on QuickOptions for GenerateMultiple
-		opts.QuickOptions.Count = opts.Count
 		results, err := qg.GenerateMultiple(opts.QuickOptions)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
