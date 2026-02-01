@@ -83,7 +83,7 @@ func buildDependencies(cmd commands.Command) (commands.Dependencies, func(), err
 	// Load and validate config
 	cfg := config.LoadConfig()
 	if err := cfg.Validate(); err != nil {
-		return deps, nil, fmt.Errorf("configuration error: %w", err)
+		return commands.Dependencies{}, nil, fmt.Errorf("configuration error: %w", err)
 	}
 	deps.Config = cfg
 
@@ -95,11 +95,11 @@ func buildDependencies(cmd commands.Command) (commands.Dependencies, func(), err
 	case "sqlite":
 		s, err = sqlite.NewSqliteStore(cfg.DbPath)
 	default:
-		return deps, nil, fmt.Errorf("unsupported store type: %s", cfg.StoreType)
+		return commands.Dependencies{}, nil, fmt.Errorf("unsupported store type: %s", cfg.StoreType)
 	}
 
 	if err != nil {
-		return deps, nil, fmt.Errorf("failed to initialize storage: %w", err)
+		return commands.Dependencies{}, nil, fmt.Errorf("failed to initialize storage: %w", err)
 	}
 	deps.Store = s
 
@@ -125,7 +125,7 @@ func buildDependencies(cmd commands.Command) (commands.Dependencies, func(), err
 	engine, err := crypto.NewEngine(cfg.MasterKey)
 	if err != nil {
 		s.Close()
-		return deps, nil, fmt.Errorf("failed to initialize crypto: %w", err)
+		return commands.Dependencies{}, nil, fmt.Errorf("failed to initialize crypto: %w", err)
 	}
 	deps.Engine = engine
 
