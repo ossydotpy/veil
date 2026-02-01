@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Veil installer script
-# Usage: curl -fsSL https://raw.githubusercontent.com/ossydotpy/veil/master/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/pioneerdinc/veil/master/install.sh | bash
 
 set -e
 
-REPO="ossydotpy/veil"
+REPO="pioneerdinc/veil"
 BINARY="veil"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 
