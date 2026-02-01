@@ -8,8 +8,7 @@ import (
 	"github.com/ossydotpy/veil/internal/app"
 	"github.com/ossydotpy/veil/internal/config"
 	"github.com/ossydotpy/veil/internal/crypto"
-	"github.com/ossydotpy/veil/internal/store"
-	"github.com/ossydotpy/veil/internal/store/sqlite"
+	"github.com/ossydotpy/veil/internal/store/factory"
 )
 
 func main() {
@@ -88,16 +87,7 @@ func buildDependencies(cmd commands.Command) (commands.Dependencies, func(), err
 	deps.Config = cfg
 
 	// Initialize store
-	var s store.Store
-	var err error
-
-	switch cfg.StoreType {
-	case "sqlite":
-		s, err = sqlite.NewSqliteStore(cfg.DbPath)
-	default:
-		return commands.Dependencies{}, nil, fmt.Errorf("unsupported store type: %s (supported: sqlite)", cfg.StoreType)
-	}
-
+	s, err := factory.NewStore(cfg.StoreType, cfg.DbPath)
 	if err != nil {
 		return commands.Dependencies{}, nil, fmt.Errorf("failed to initialize storage: %w", err)
 	}
