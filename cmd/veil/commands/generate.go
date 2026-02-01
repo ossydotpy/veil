@@ -39,7 +39,10 @@ func (c *GenerateCommand) Execute(args []string, deps Dependencies) error {
 	}
 
 	vault, name := args[0], args[1]
-	opts := flags.ParseGenerateFlags(args[2:])
+	opts, err := flags.ParseGenerateFlags(args[2:])
+	if err != nil {
+		return err
+	}
 
 	secret, err := deps.App.Generate(vault, name, opts)
 	if err != nil {

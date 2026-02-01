@@ -34,7 +34,10 @@ func (c *ExportCommand) Execute(args []string, deps Dependencies) error {
 	}
 
 	vault := args[0]
-	opts := flags.ParseExportFlags(args[1:])
+	opts, err := flags.ParseExportFlags(args[1:])
+	if err != nil {
+		return err
+	}
 
 	preview, err := deps.App.Export(vault, opts)
 	if err != nil {

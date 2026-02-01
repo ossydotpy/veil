@@ -1,10 +1,19 @@
 package flags
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/ossydotpy/veil/internal/quick"
+)
+
+const (
+	minQuickPasswordLength = 1
+	maxQuickPasswordLength = 512
+	minQuickJWTBits        = 128
+	maxQuickJWTBits        = 512
+	maxQuickCount          = 100
 )
 
 // QuickOptions holds parsed flags for the quick command.
@@ -14,7 +23,7 @@ type QuickOptions struct {
 }
 
 // ParseQuickFlags parses command-line flags for the quick command.
-func ParseQuickFlags(args []string) QuickOptions {
+func ParseQuickFlags(args []string) (QuickOptions, error) {
 	opts := QuickOptions{
 		Options: quick.Options{
 			Type: "password",
@@ -41,9 +50,19 @@ func ParseQuickFlags(args []string) QuickOptions {
 		case "--length":
 			if i+1 < len(args) {
 				length, err := strconv.Atoi(args[i+1])
-				if err == nil {
-					opts.Length = length
+				if err != nil {
+					return opts, fmt.Errorf("invalid --length value %q: must be a number", args[i+1])
 				}
+				if length < 0 {
+					return opts, fmt.Errorf("invalid --length value %d: must be a positive number", length)
+				}
+				if length > 0 && length < minQuickPasswordLength {
+					return opts, fmt.Errorf("invalid --length value %d: must be at least %d", length, minQuickPasswordLength)
+				}
+				if length > maxQuickPasswordLength {
+					return opts, fmt.Errorf("invalid --length value %d: must not exceed %d", length, maxQuickPasswordLength)
+				}
+				opts.Length = length
 				i++
 			}
 		case "--format":
@@ -59,9 +78,19 @@ func ParseQuickFlags(args []string) QuickOptions {
 		case "--bits":
 			if i+1 < len(args) {
 				bits, err := strconv.Atoi(args[i+1])
-				if err == nil {
-					opts.Bits = bits
+				if err != nil {
+					return opts, fmt.Errorf("invalid --bits value %q: must be a number", args[i+1])
 				}
+				if bits < 0 {
+					return opts, fmt.Errorf("invalid --bits value %d: must be a positive number", bits)
+				}
+				if bits > 0 && bits < minQuickJWTBits {
+					return opts, fmt.Errorf("invalid --bits value %d: must be at least %d", bits, minQuickJWTBits)
+				}
+				if bits > maxQuickJWTBits {
+					return opts, fmt.Errorf("invalid --bits value %d: must not exceed %d", bits, maxQuickJWTBits)
+				}
+				opts.Bits = bits
 				i++
 			}
 		case "--no-symbols":
@@ -69,9 +98,16 @@ func ParseQuickFlags(args []string) QuickOptions {
 		case "--count":
 			if i+1 < len(args) {
 				count, err := strconv.Atoi(args[i+1])
-				if err == nil {
-					opts.Count = count
+				if err != nil {
+					return opts, fmt.Errorf("invalid --count value %q: must be a number", args[i+1])
 				}
+				if count < 0 {
+					return opts, fmt.Errorf("invalid --count value %d: must be a positive number", count)
+				}
+				if count > maxQuickCount {
+					return opts, fmt.Errorf("invalid --count value %d: must not exceed %d", count, maxQuickCount)
+				}
+				opts.Count = count
 				i++
 			}
 		case "--to":
@@ -99,5 +135,5 @@ func ParseQuickFlags(args []string) QuickOptions {
 		}
 	}
 
-	return opts
+	return opts, nil
 }

@@ -5,7 +5,7 @@ import (
 )
 
 // ParseExportFlags parses command-line flags for the export command.
-func ParseExportFlags(args []string) exporter.ExportOptions {
+func ParseExportFlags(args []string) (exporter.ExportOptions, error) {
 	opts := exporter.ExportOptions{
 		TargetPath: ".env",
 		Format:     "env",
@@ -44,5 +44,5 @@ func ParseExportFlags(args []string) exporter.ExportOptions {
 		}
 	}
 
-	return opts
+	return opts, nil
 }

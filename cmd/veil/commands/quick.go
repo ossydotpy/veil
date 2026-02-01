@@ -34,7 +34,10 @@ func (c *QuickCommand) Execute(args []string, deps Dependencies) error {
 		stderr = os.Stderr
 	}
 
-	opts := flags.ParseQuickFlags(args)
+	opts, err := flags.ParseQuickFlags(args)
+	if err != nil {
+		return err
+	}
 	qg := quick.New()
 
 	// Handle batch mode

@@ -1,13 +1,21 @@
 package flags
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/ossydotpy/veil/internal/generator"
 )
 
+const (
+	minPasswordLength = 8
+	maxPasswordLength = 128
+	minJWTBits        = 128
+	maxJWTBits        = 512
+)
+
 // ParseGenerateFlags parses command-line flags for the generate command.
-func ParseGenerateFlags(args []string) generator.Options {
+func ParseGenerateFlags(args []string) (generator.Options, error) {
 	opts := generator.Options{
 		Type: "password",
 	}
@@ -32,17 +40,37 @@ func ParseGenerateFlags(args []string) generator.Options {
 		case "--length":
 			if i+1 < len(args) {
 				length, err := strconv.Atoi(args[i+1])
-				if err == nil {
-					opts.Length = length
+				if err != nil {
+					return opts, fmt.Errorf("invalid --length value %q: must be a number", args[i+1])
 				}
+				if length < 0 {
+					return opts, fmt.Errorf("invalid --length value %d: must be a positive number", length)
+				}
+				if length > 0 && length < minPasswordLength {
+					return opts, fmt.Errorf("invalid --length value %d: must be at least %d", length, minPasswordLength)
+				}
+				if length > maxPasswordLength {
+					return opts, fmt.Errorf("invalid --length value %d: must not exceed %d", length, maxPasswordLength)
+				}
+				opts.Length = length
 				i++
 			}
 		case "--bits":
 			if i+1 < len(args) {
 				bits, err := strconv.Atoi(args[i+1])
-				if err == nil {
-					opts.Bits = bits
+				if err != nil {
+					return opts, fmt.Errorf("invalid --bits value %q: must be a number", args[i+1])
 				}
+				if bits < 0 {
+					return opts, fmt.Errorf("invalid --bits value %d: must be a positive number", bits)
+				}
+				if bits > 0 && bits < minJWTBits {
+					return opts, fmt.Errorf("invalid --bits value %d: must be at least %d", bits, minJWTBits)
+				}
+				if bits > maxJWTBits {
+					return opts, fmt.Errorf("invalid --bits value %d: must not exceed %d", bits, maxJWTBits)
+				}
+				opts.Bits = bits
 				i++
 			}
 		case "--no-symbols":
@@ -57,5 +85,5 @@ func ParseGenerateFlags(args []string) generator.Options {
 		}
 	}
 
-	return opts
+	return opts, nil
 }
