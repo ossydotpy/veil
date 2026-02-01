@@ -113,6 +113,9 @@ func buildDependencies(cmd commands.Command) (commands.Dependencies, func(), err
 	}
 
 	// Validate master key and initialize crypto
+	// Note: We explicitly close the store on error paths because the cleanup
+	// function is only returned on success paths. This ensures immediate
+	// resource cleanup without relying on deferred cleanup that may not execute.
 	if cfg.MasterKey == "" {
 		s.Close()
 		return commands.Dependencies{}, nil, fmt.Errorf("MASTER_KEY environment variable is not set")
