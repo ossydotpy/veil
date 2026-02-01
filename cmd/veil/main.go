@@ -95,7 +95,7 @@ func buildDependencies(cmd commands.Command) (commands.Dependencies, func(), err
 	case "sqlite":
 		s, err = sqlite.NewSqliteStore(cfg.DbPath)
 	default:
-		return commands.Dependencies{}, nil, fmt.Errorf("unsupported store type: %s", cfg.StoreType)
+		return commands.Dependencies{}, nil, fmt.Errorf("unsupported store type: %s (supported: sqlite)", cfg.StoreType)
 	}
 
 	if err != nil {
